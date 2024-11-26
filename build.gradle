@@ -37,6 +37,10 @@ subprojects {
         implementation 'org.flywaydb:flyway-database-postgresql'
         runtimeOnly 'org.postgresql:postgresql'
 
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+
 
         implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
 //        runtimeOnly 'software.amazon.awssdk:bom:2.29.20'
