@@ -1,0 +1,8 @@
+rootProject.name = 'movie-ticket-platform'
+include('user-service')
+include('theatre-service')
+include('booking-service')
+include('payment-service')
+include('notification-service')
+include('admin-service')
+include('analytics-service')

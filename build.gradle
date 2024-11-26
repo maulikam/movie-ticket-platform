@@ -1,0 +1,91 @@
+plugins {
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
+    id 'io.spring.dependency-management' version "${dependencyManagementVersion}" apply false
+    id 'java'
+    id 'com.google.cloud.tools.jib' version "${jibVersion}" apply false
+
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(javaVersion)
+    }
+}
+
+allprojects {
+    group = 'com.publicissapient.movie'
+    version = project.version
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+        implementation 'org.flywaydb:flyway-core'
+        implementation 'org.flywaydb:flyway-database-postgresql'
+        runtimeOnly 'org.postgresql:postgresql'
+
+
+        implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+//        runtimeOnly 'software.amazon.awssdk:bom:2.29.20'
+//        testImplementation 'software.amazon.awssdk:s3:2.29.20'
+//        implementation 'software.amazon.awssdk:dynamodb:2.29.20'
+//        testImplementation 'software.amazon.awssdk:sns:2.29.20'
+//        implementation 'software.amazon.awssdk:ses:2.29.20'
+//        implementation 'software.amazon.awssdk:kinesis:2.29.20'
+//        implementation 'software.amazon.awssdk:cloudwatch:2.29.20'
+
+        implementation "software.amazon.awssdk:s3"
+        implementation "software.amazon.awssdk:dynamodb"
+        implementation "software.amazon.awssdk:sns"
+        implementation "software.amazon.awssdk:ses"
+        implementation "software.amazon.awssdk:kinesis"
+        implementation "software.amazon.awssdk:cloudwatch"
+
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.security:spring-security-oauth2-client'
+
+        implementation 'org.springframework.kafka:spring-kafka'
+
+        implementation "io.micrometer:micrometer-registry-cloudwatch2:${micrometerVersion}"
+
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+        testImplementation "org.springframework.boot:spring-boot-starter-test"
+        testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher:${junitLauncherVersion}"
+    }
+
+    jib {
+        from {
+            image = 'eclipse-temurin:17-jre'
+        }
+        to {
+            image = "public.ecr.aws/my-aws-repo/${project.name}:${version}"
+        }
+        container {
+            jvmFlags = ['-Xms512m', '-Xmx1024m']
+            ports = ['8080']
+            environment = [
+                    'SPRING_PROFILES_ACTIVE': 'prod'
+            ]
+        }
+    }
+
+    // Test configurations
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
